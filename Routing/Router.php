@@ -2,22 +2,22 @@
 
 namespace Bedrock\Routing;
 
+use Bedrock\Exceptions\Routing\MethodNotAllowedException;
+use Bedrock\Exceptions\Routing\RouteAlreadyExistsException;
 use Bedrock\Exceptions\Routing\RouteNotFoundException;
+use Bedrock\Response\Response;
 
 class Router
 {
-    protected $routes;
-    protected $methods;
-
-    public function __construct()
-    {
-        $this->methods = [];
-        $this->routes = [];
-    }
+    protected $routes = [];
+    protected $methods = [];
 
     private function addRoute($verb, $uri, $callback)
     {
         $this->routes[] = [$verb, $uri, $callback];
+        if (array_key_exists($verb, $this->methods) && array_key_exists($uri, $this->methods[$verb])) {
+            throw new RouteAlreadyExistsException;
+        }
         $this->methods[$verb][$uri] = $callback;
     }
 
@@ -48,16 +48,18 @@ class Router
 
     public function dumpRoutes()
     {
-        print_r($this->methods["GET"]);
+        print_r($this->routes);
     }
 
     public function serveRoute($requestDetails)
     {
-        if (in_array($requestDetails[1], array_keys($this->methods[$requestDetails[0]]))) {
-            $this->methods[$requestDetails[0]][$requestDetails[1]]();
-            return;
+        if (!array_key_exists($requestDetails[0], $this->methods)) {
+            throw new MethodNotAllowedException;
         }
 
+        if (in_array($requestDetails[1], array_keys($this->methods[$requestDetails[0]]))) {
+            return new Response($this->methods[$requestDetails[0]][$requestDetails[1]]);
+        }
         throw new RouteNotFoundException;
     }
 }
