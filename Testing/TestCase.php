@@ -52,14 +52,24 @@ class TestCase extends PHPUnitTestCase {
 
     public function executeRequest()
     {
-        return $this->router->serveRoute([$this->method, $this->uri]);
+        return $this->router->serveRoute($this->method, $this->uri);
     }
 
-    public function see($content)
+    public function see($term)
     {
-        $response = $this->router->serveRoute([$this->method, $this->uri]);
+        $response = $this->router->serveRoute($this->method, $this->uri);
 
         $responseContent = $response->getContent();
-        $this->assertTrue(strpos($responseContent, $content) !== false);
+        $this->assertTrue(strpos($responseContent, $term) !== false, "Failed asserting that response contains [$term]");
+        return $this;
+    }
+
+    public function dontSee($term)
+    {
+        $response = $this->router->serveRoute($this->method, $this->uri);
+
+        $responseContent = $response->getContent();
+        $this->assertTrue(strpos($responseContent, $term) === false, "Failed asserting that response doesn't contain [$term]");
+        return $this;
     }
 }

@@ -17,8 +17,8 @@ class RouterTest extends TestCase
         };
 
         try {
-            $this->post('testing');
-            $this->executeRequest();
+            $this->post('/test-route')
+                ->executeRequest();
         } catch (Bedrock\Exceptions\Routing\MethodNotAllowedException $e) {
             return;
         }
@@ -29,7 +29,9 @@ class RouterTest extends TestCase
     /** @test */
     function an_exception_is_thrown_if_the_same_route_is_added_twice()
     {
-        $this->router = new class extends Bedrock\Routing\Router {};
+        $this->router = new class extends Bedrock\Routing\Router {
+
+        };
         try {
             $this->router->put('/test-route', function () {
                 return 'test response';
@@ -37,7 +39,6 @@ class RouterTest extends TestCase
             $this->router->put('/test-route', function () {
                 return 'somethingelse';
             });
-            $this->router->dumpRoutes();
         } catch (Bedrock\Exceptions\Routing\RouteAlreadyExistsException $e) {
             return;
         }
@@ -49,16 +50,17 @@ class RouterTest extends TestCase
     function an_exception_is_thrown_if_the_route_doesnt_exist()
     {
         $this->router = new class extends Bedrock\Routing\Router {
-            public function __construct () {
+            public function __construct()
+            {
                 $this->get('/', function () {
                     return 'something';
                 });
             }
         };
         try {
-            $this->get('/')
-                ->see('response');
-        }  catch (Bedrock\Exceptions\Routing\RouteNotFoundException $e) {
+            $this->get('/test-things')
+                ->executeRequest();
+        } catch (Bedrock\Exceptions\Routing\RouteNotFoundException $e) {
             return;
         }
         
@@ -78,7 +80,7 @@ class RouterTest extends TestCase
         };
 
         $this->get('/')
-            ->see('response');
+            ->see('test response');
     }
 
     /** @test */
@@ -143,5 +145,65 @@ class RouterTest extends TestCase
 
         $this->delete('/route')
             ->see('test response');
+    }
+
+    /** @test */
+    function can_call_a_route_with_a_parameter()
+    {
+        $this->router = new class extends Bedrock\Routing\Router {
+            public function __construct()
+            {
+                $this->get('/test/{number}/something', function ($number) {
+                    return "You entered $number";
+                });
+            }
+        };
+
+        $this->get('/test/2/something')
+            ->see("You entered 2");
+    }
+
+    /** @test */
+    function can_call_a_route_with_multiple_parameters()
+    {
+        $this->router = new class extends Bedrock\Routing\Router {
+            public function __construct()
+            {
+                $this->get('/test/{word}/something/{data}', function ($word, $data) {
+                    return "You entered $word and $data";
+                });
+            }
+        };
+
+        $this->get('/test/foo/something/bar')
+            ->see("You entered foo and bar");
+    }
+
+    /** @test */
+    function can_call_a_route_with_optional_parameters()
+    {
+        $this->router = new class extends Bedrock\Routing\Router {
+            public function __construct()
+            {
+                $this->get('/test/{word}/something/{?data}', function ($word, $data = '') {
+                    return "You entered $word and $data";
+                });
+            }
+        };
+
+        $this->get('/test/foo/something/bar')
+            ->see("You entered foo and bar");
+
+        $this->get('/test/foo/something')
+            ->see("You entered foo and");
+
+        try {
+            $this->get('/test/foo/something/bar/else')
+                ->executeRequest();
+        } catch (Bedrock\Exceptions\Routing\RouteNotFoundException $e) {
+            return;
+        }
+
+        $this->fail("Failed catching expected Bedrock\Exceptions\Routing\RouteNotFoundException");
     }
 }
