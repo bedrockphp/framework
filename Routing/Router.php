@@ -2,28 +2,34 @@
 
 namespace Bedrock\Routing;
 
+use Bedrock\Response\Response;
 use Bedrock\Exceptions\Routing\RouteNotFoundException;
+use Bedrock\Exceptions\Routing\UnexpectedRouteException;
+use Bedrock\Exceptions\Routing\MethodNotAllowedException;
+use Bedrock\Exceptions\Routing\RouteAlreadyExistsException;
 
 class Router
 {
-    protected $routes;
-    protected $methods;
-
-    public function __construct()
-    {
-        $this->methods = [];
-        $this->routes = [];
-    }
+    protected $routes = [];
+    protected $methods = [];
+    protected $uris = [];
 
     private function addRoute($verb, $uri, $callback)
     {
+        if (array_key_exists($verb, $this->methods) && array_key_exists($uri, $this->methods[$verb])) {
+            throw new RouteAlreadyExistsException;
+        }
         $this->routes[] = [$verb, $uri, $callback];
         $this->methods[$verb][$uri] = $callback;
+        $this->uris[$uri][] = $verb;
     }
 
     public function get($uri, $callback)
     {
         $this->addRoute("GET", $uri, $callback);
+        $this->addRoute("HEAD", $uri, function () {
+            // do nothing
+        });
     }
 
     public function post($uri, $callback)
@@ -48,14 +54,24 @@ class Router
 
     public function dumpRoutes()
     {
-        print_r($this->methods["GET"]);
+        print_r($this->methods);
     }
 
-    public function serveRoute($requestDetails)
+    public function serveRoute($method, $uri)
     {
-        if (in_array($requestDetails[1], array_keys($this->methods[$requestDetails[0]]))) {
-            $this->methods[$requestDetails[0]][$requestDetails[1]]();
-            return;
+        if (!array_key_exists($method, $this->methods)) {
+            throw new MethodNotAllowedException;
+        }
+
+        foreach ($this->methods[$method] as $route => $callback) {
+            $newRoute = preg_replace("/\/{\?.+?}/", "/?([^/]+)?", $route);
+            $newRoute = preg_replace("/{.+?}/", "([^/]+)", $newRoute);
+            $escapedRoute = str_replace('/', '\/', $newRoute);
+
+            if (preg_match("/^$escapedRoute$/", $uri, $segments)) {
+                $args = array_slice($segments, 1);
+                return new Response($callback, $args);
+            }
         }
 
         throw new RouteNotFoundException;
