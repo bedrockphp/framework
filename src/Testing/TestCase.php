@@ -2,7 +2,7 @@
 
 namespace Bedrock\Testing;
 
-use App\Router;
+use Bedrock\Routing\Router;
 use PHPUnit\Framework\TestCase as PHPUnitTestCase;
 
 class TestCase extends PHPUnitTestCase {

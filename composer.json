@@ -15,7 +15,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Bedrock\\": "./"
+            "Bedrock\\": "src"
         }
     },
     "config": {
