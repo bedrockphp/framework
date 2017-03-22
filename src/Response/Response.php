@@ -20,7 +20,8 @@ class Response
 
     public function getContent()
     {
-        $response = ($this->route)(...$this->args);
+        // $response = ($this->route)(...$this->args);
+        $response = call_user_func($this->route, ...$this->args);
         return $response;
     }
 }
