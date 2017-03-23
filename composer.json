@@ -6,7 +6,9 @@
     "type": "project",
     "require": {
         "php": ">=5.6.4",
-        "monolog/monolog": "^1.22"
+        "monolog/monolog": "^1.22",
+        "league/container": "^2.4",
+        "jenssegers/blade": "^1.1"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",
@@ -16,7 +18,10 @@
     "autoload": {
         "psr-4": {
             "Bedrock\\": "src"
-        }
+        },
+        "files": [
+            "./load.php"
+        ]
     },
     "config": {
         "preferred-install": "dist"
