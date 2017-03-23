@@ -18,6 +18,9 @@
     "autoload": {
         "psr-4": {
             "Bedrock\\": "src"
+        },
+        "files": {
+            "src/helpers/helpers.php"
         }
     },
     "autoload-dev": {
