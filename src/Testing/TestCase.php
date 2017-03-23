@@ -60,7 +60,7 @@ class TestCase extends PHPUnitTestCase {
         $response = $this->router->serveRoute($this->method, $this->uri);
 
         $responseContent = $response->getContent();
-        $this->assertTrue(strpos($responseContent, $term) !== false, "Failed asserting that response contains [$term]");
+        $this->assertTrue(strpos($responseContent, $term) !== false, "This is the response:\n$responseContent \n\nFailed asserting that response contains [$term]");
         return $this;
     }
 
@@ -69,7 +69,7 @@ class TestCase extends PHPUnitTestCase {
         $response = $this->router->serveRoute($this->method, $this->uri);
 
         $responseContent = $response->getContent();
-        $this->assertTrue(strpos($responseContent, $term) === false, "Failed asserting that response doesn't contain [$term]");
+        $this->assertTrue(strpos($responseContent, $term) === false, "This is the response:\n$responseContent \n\nFailed asserting that response doesn't contain [$term]");
         return $this;
     }
 }
