@@ -162,4 +162,16 @@ class RouterTest extends TestCase
 
         $this->fail("Failed catching expected Bedrock\Exceptions\Routing\RouteNotFoundException");
     }
+
+    /** @test */
+    function can_call_a_route_with_a_query_string()
+    {
+        $this->router = new Router;
+        $this->router->get('/', function () {
+            return 'test response';
+        });
+
+        $this->get('/?utm_source=Test&utm_medium=Testing')
+            ->see('test response');
+    }
 }

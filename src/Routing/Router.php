@@ -63,6 +63,10 @@ class Router
             throw new MethodNotAllowedException;
         }
 
+        if (strpos($uri, '?') !== false) {
+            $uri = substr($uri, 0, strpos($uri, '?'));
+        }
+
         foreach ($this->methods[$method] as $route => $callback) {
             $newRoute = preg_replace("/\/{\?.+?}/", "/?([^/]+)?", $route);
             $newRoute = preg_replace("/{.+?}/", "([^/]+)", $newRoute);
