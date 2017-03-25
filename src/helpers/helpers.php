@@ -14,8 +14,10 @@ function config($value)
     return $container->get('config')->config->$value ?: null;
 }
 
-function dd($value)
-{
-    var_dump($value);
-    die();
+if (!function_exists('dd')) {
+    function dd($value)
+    {
+        var_dump($value);
+        die();
+    }
 }
