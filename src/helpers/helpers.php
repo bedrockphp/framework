@@ -12,5 +12,10 @@ function config($value)
 {
     $container = Container::getInstance();
     return $container->get('config')->config->$value ?: null;
-    // return $container->has('config') ? $container->get('config')->$value : null;
+}
+
+function dd($value)
+{
+    var_dump($value);
+    die();
 }
