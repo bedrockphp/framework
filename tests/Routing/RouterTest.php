@@ -174,4 +174,19 @@ class RouterTest extends TestCase
         $this->get('/?utm_source=Test&utm_medium=Testing')
             ->see('test response');
     }
+
+    /** @test */
+    function can_call_a_univeral_route_on_every_request()
+    {
+        $this->router = new Router;
+        $this->router->get('*', function () {
+            return 'test response1';
+        });
+        $this->router->get('/', function () {
+            return 'test response2';
+        });
+
+        $this->get('/')
+            ->see('test response1');
+    }
 }

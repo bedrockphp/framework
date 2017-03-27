@@ -7,10 +7,11 @@ class Response
     protected $route;
     protected $args;
 
-    public function __construct($route, $args)
+    public function __construct($route, $args = [], $extraData = null)
     {
         $this->route = $route;
         $this->args = $args;
+        $this->extraData = $extraData;
     }
 
     public function __toString()
@@ -22,6 +23,6 @@ class Response
     {
         // $response = ($this->route)(...$this->args);
         $response = call_user_func($this->route, ...$this->args);
-        return $response;
+        return $this->extraData . $response;
     }
 }
