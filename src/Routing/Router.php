@@ -70,6 +70,7 @@ class Router
             $uri = substr($uri, 0, strpos($uri, '?'));
         }
 
+        $response = null;
         if (array_key_exists("\*", $this->methods[$method])) {
             $response = (new Response($this->methods[$method]["\*"]))->getContent();
         }
