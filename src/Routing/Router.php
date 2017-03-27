@@ -19,6 +19,9 @@ class Router
         if (array_key_exists($verb, $this->methods) && array_key_exists($uri, $this->methods[$verb])) {
             throw new RouteAlreadyExistsException;
         }
+
+        $uri = str_replace("*", "\*", $uri);
+
         $this->routes[] = [$verb, $uri, $callback];
         $this->methods[$verb][$uri] = $callback;
         $this->uris[$uri][] = $verb;
@@ -54,7 +57,7 @@ class Router
 
     public function dumpRoutes()
     {
-        print_r($this->methods);
+        dd($this->methods);
     }
 
     public function serveRoute($method, $uri)
@@ -67,6 +70,10 @@ class Router
             $uri = substr($uri, 0, strpos($uri, '?'));
         }
 
+        if (array_key_exists("\*", $this->methods[$method])) {
+            $response = (new Response($this->methods[$method]["\*"]))->getContent();
+        }
+
         foreach ($this->methods[$method] as $route => $callback) {
             $newRoute = preg_replace("/\/{\?.+?}/", "/?([^/]+)?", $route);
             $newRoute = preg_replace("/{.+?}/", "([^/]+)", $newRoute);
@@ -74,7 +81,7 @@ class Router
 
             if (preg_match("/^$escapedRoute$/", $uri, $segments)) {
                 $args = array_slice($segments, 1);
-                return new Response($callback, $args);
+                return new Response($callback, $args, $response);
             }
         }
 
